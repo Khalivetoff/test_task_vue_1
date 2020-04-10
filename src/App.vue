@@ -276,6 +276,7 @@
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
+    padding: 0px 5px;
   }
 
   .main-container .button_add-note {
@@ -304,6 +305,10 @@
   @media (max-width: 959px) {
     .main-container {
       padding: 16px;
+    }
+
+    .main-container .main-content {
+      margin-top: 11px;
     }
 
     .main-content__item {

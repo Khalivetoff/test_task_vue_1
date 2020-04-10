@@ -1,7 +1,5 @@
 <template>
-  <div
-    class="modal-wrapper"
-  >
+  <div class="modal-wrapper">
     <div class="modal">
       <div class="modal-create-note__layout">
         <div class="layout-row modal-create-note__title">
@@ -118,6 +116,9 @@
           }
       },
       methods: {
+          test() {
+              console.log('test()');
+          },
           returnData(type) {
               if (type == 'back') {
                   this.edit_note_local = JSON.parse(JSON.stringify(this.edit_note_local_temp_1));

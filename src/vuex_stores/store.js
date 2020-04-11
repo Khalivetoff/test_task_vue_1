@@ -48,7 +48,9 @@ export const store = new Vuex.Store({
     getDataLS(state) {
       let data = JSON.parse(localStorage.getItem('data_from_ls'));
       !data ? data = [] : 0;
-      state.tasks_id_arr = data.map(item => {return item.NoteID});
+      state.tasks_id_arr = data.map(item => {
+        return item.NoteID
+      });
       state.main_data = data;
       emitter.$emit('change-main-data', state.main_data);
     },
@@ -97,7 +99,8 @@ export const store = new Vuex.Store({
         state.modal_edit.Value = note_data;
         state.modal_confirm.View = true;
       } else {
-        state.modal_confirm.ModalText = 'Закрыть окно редактирования?';
+        state.modal_edit.Value.NoteID == null ? state.modal_confirm.ModalText = 'Закрыть окно создания?' :
+          state.modal_confirm.ModalText = 'Закрыть окно редактирования?';
         state.modal_confirm.Type = 'close';
         state.modal_confirm.View = true;
       }

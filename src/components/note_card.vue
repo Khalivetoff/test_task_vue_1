@@ -7,13 +7,13 @@
           <div class="task-item__control-wrapper">
             <button
               class="button button_control"
-              @click="showModalConfirmDelete()"
+              @click="$emit('delete-note', note_info)"
             >
               <i class="material-icons">delete</i>
             </button>
             <button
               class="button button_control"
-              @click="$root.$emit('show-modal-edit-note', note_info)"
+              @click="$emit('edit-note', note_info)"
             >
               <i class="material-icons">edit</i>
             </button>
@@ -53,16 +53,12 @@
 </template>
 
 <script>
+  /**Если не поменяется структура эл-ов массива в заметками, то этот компонент переиспользуем*/
     export default {
         props: {
             note_info: {
                 type: Object,
             },
-        },
-        methods: {
-            showModalConfirmDelete() {
-                this.$root.$emit('delete-note-item', this.note_info);
-            }
         },
         computed: {
             cutTasksArr() {

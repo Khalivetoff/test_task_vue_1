@@ -7,13 +7,13 @@
           <div class="modal__buttons-wrapper">
             <button
               class="button modal__button"
-              @click="reject()"
+              @click="$emit('accept')"
             >
               <i class="material-icons">clear</i>
             </button>
             <button
               class="button modal__button"
-              @click="accept()"
+              @click="$emit('reject')"
             >
               <i class="material-icons">done</i>
             </button>
@@ -25,17 +25,10 @@
 </template>
 
 <script>
-    export default {
-        props: ['modal_text'],
-        methods: {
-            accept() {
-                this.$emit('accept');
-            },
-            reject() {
-                this.$emit('reject');
-            }
-        }
-    }
+  /**По сути, этот компонент полностью переиспользуем*/
+  export default {
+      props: ['modal_text']
+  }
 </script>
 
 <style scoped>

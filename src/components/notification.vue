@@ -15,6 +15,7 @@
 </template>
 
 <script>
+    import {emitter} from '../components/emitter.js'
     export default {
         data() {
             return {
@@ -32,7 +33,7 @@
             }
         },
         mounted() {
-            this.$root.$on('notification', (val, type) => {
+            emitter.$on('notification', (val, type) => {
                 let id = 0;
                 while (this.notification_id_arr.includes(id)) {
                     id++;

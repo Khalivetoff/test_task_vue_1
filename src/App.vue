@@ -5,7 +5,7 @@
         <div class="top-content">
           <button
             class="button button_add-note"
-            @click="$root.$emit('show-modal-edit-note')"
+            @click="$store.commit('showModalEditNote')"
           >
             Добавить заметку
           </button>
@@ -14,180 +14,62 @@
           <div class="layout">
             <div
               class="main-content__item"
-              v-for="(item, index) in data_from_ls"
+              v-for="(item, index) in main_data"
               :key="index"
             >
               <node-card
                 :note_info="item"
+                @delete-note="$store.commit('showModalConfirm', $event)"
+                @edit-note="$store.commit('showModalEditNote', $event)"
               ></node-card>
             </div>
             <div
               class="notif-null-data"
-              v-if="!data_from_ls[0]">
+              v-if="!main_data[0]">
               У Вас нет ни одной заметки
             </div>
           </div>
         </div>
       </div>
     </div>
+    <modal-edit v-if="$store.state.modal_edit.View"></modal-edit>
     <modal-confirm
-      v-if="show_modal_confirm"
-      @reject="closeModalConfirm()"
-      @accept="accept()"
-      :modal_text="modal_text"
+      v-if="$store.state.modal_confirm.View"
+      @accept="$store.state.modal_confirm.View = false"
+      @reject="$store.commit('modalAccept')"
+      :modal_text="$store.state.modal_confirm.ModalText"
     ></modal-confirm>
-    <modal-edit
-      v-if="show_modal_edit_note"
-      :edit_note="edit_note"
-      :modal_title="modal_edit_title"
-      @change-edit="saveEditNote($event)"
-      @close-modal="closeModalEditNote()"
-    ></modal-edit>
     <notification></notification>
   </div>
+
 </template>
 
 <script>
 
+    import {store} from './vuex_stores/store.js'
     import ModalConfirm from './components/modal_confirm.vue'
-    import NodeCard from './components/node_card.vue'
+    import NoteCard from './components/note_card.vue'
     import Notification from './components/notification.vue'
     import ModalEdit from './components/modal_edit_note.vue'
+    import {emitter} from './components/emitter'
 
     export default {
         name: 'app',
+        store,
         components: {
             'modal-confirm': ModalConfirm,
-            'node-card': NodeCard,
+            'node-card': NoteCard,
             'notification': Notification,
             'modal-edit': ModalEdit
         },
-        data() {
-            return {
-                data_from_ls: [],
-                note_id_arr: [],
-
-                show_modal_confirm: false,
-                modal_text: null,
-
-                confirm_delete: false,
-
-                show_modal_edit_note: false,
-                modal_edit_title: 'Редактирование заметки',
-
-                edit_note: {
-                    Name: '',
-                    Tasks: []
-                },
-                edit_note_empty: {
-                    Name: '',
-                    Tasks: []
-                },
+        computed: {
+            main_data() {
+                return this.$store.state.main_data
             }
         },
-        methods: {
-            /**В ТЗ сказано, что после перезагрузки стр. данные должны быть сохранены.
-             * Для этого при первой загрузке app из LS берутся эти самые данные.
-             * При каждом изменении данных они сохраняются в LS.*/
-            //в начале получим из LS данные
-            getDataLS() {
-                this.data_from_ls = JSON.parse(localStorage.getItem('data_from_ls'));
-                !this.data_from_ls ? this.data_from_ls = [] : 0;
-                //своеобразная чекалка id, замена бэка
-                this.note_id_arr = this.data_from_ls.map(item => {
-                    return item.NoteID;
-                })
-                console.log(this.data_from_ls);
-            },
-            //при изменении данных вносим их в LS
-            setDataLS() {
-                localStorage.setItem('data_from_ls', JSON.stringify(this.data_from_ls));
-            },
-            //delete note-------------------------------------
-            accept() {
-                if (this.show_modal_edit_note) {
-                    if (this.confirm_delete) {
-                        this.deleteNote();
-                    }
-                    this.closeModalEditNote();
-                    this.show_modal_confirm = false;
-                } else {
-                    this.deleteNote();
-                }
-                this.confirm_delete = false;
-            },
-            deleteNote() {
-                this.data_from_ls = this.data_from_ls.filter(item => {
-                    return item.NoteID !== this.edit_note.NoteID;
-                })
-                this.note_id_arr = this.note_id_arr.filter(item => {
-                    return item !== this.edit_note.NoteID;
-                })
-                this.setDataLS();
-                this.$root.$emit('notification', 'Заметка успешно удалена', 'success');
-                this.show_modal_confirm = false;
-                this.edit_note = JSON.parse(JSON.stringify(this.edit_note_empty));
-            },
-            //-------------------------------------------------
-            //edit/create note---------------------------------
-            closeModalEditNote() {
-                this.show_modal_edit_note = false;
-                this.edit_note = JSON.parse(JSON.stringify(this.edit_note_empty));
-            },
-            saveEditNote(note_data) {
-                let note_data_local = JSON.parse(JSON.stringify(note_data));
-                if (note_data_local.NoteID == undefined) {
-                    //своеобразная чекалка id, замена бэка
-                    let counter = 0;
-                    while (this.note_id_arr.includes(counter)) {
-                        counter++;
-                    }
-                    this.note_id_arr.push(counter);
-
-                    this.$set(note_data_local, 'NoteID', counter);
-                    this.data_from_ls.push(note_data_local);
-                    this.closeModalEditNote();
-                    this.$root.$emit('notification', 'Заметка успешно добавлена', 'success');
-                } else {
-                    for (let item of this.data_from_ls) {
-                        if (item.NoteID == note_data_local.NoteID) {
-                            item.Name = note_data_local.Name;
-                            item.Tasks = note_data_local.Tasks;
-                        }
-                    }
-                    this.$root.$emit('notification', 'Заметка успешно изменена', 'success');
-                }
-                this.setDataLS();
-            },
-            //-------------------------------------------------
-            closeModalConfirm() {
-                this.show_modal_confirm = false;
-                this.edit_note = JSON.parse(JSON.stringify(this.edit_note_empty));
-            }
+        created() {
+            this.$store.commit('getDataLS');
         },
-        mounted() {
-            this.getDataLS();
-            this.$root.$on('delete-note-item', (note_info) => {
-                this.edit_note = note_info;
-                this.modal_text = 'Удалить заметку?';
-                this.confirm_delete = true;
-                this.show_modal_confirm = true;
-            })
-            this.$root.$on('confirm-close-modal-edit', () => {
-                this.modal_text = 'Закрыть окно редактирования?';
-                this.confirm_delete = false;
-                this.show_modal_confirm = true;
-            })
-            this.$root.$on('show-modal-edit-note', (val) => {
-                if (val) {
-                    this.modal_edit_title = 'Редактирование заметки';
-                    this.edit_note = val;
-                } else {
-                    this.modal_edit_title = 'Добавление заметки';
-                }
-                this.show_modal_edit_note = true;
-            })
-        }
     }
 </script>
 

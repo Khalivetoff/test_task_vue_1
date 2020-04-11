@@ -32,7 +32,7 @@
                 })
             }
         },
-        mounted() {
+        created() {
             emitter.$on('notification', (val, type) => {
                 let id = 0;
                 while (this.notification_id_arr.includes(id)) {
@@ -48,6 +48,9 @@
                     })
                 }, 3000);
             })
+        },
+        beforeDestroy() {
+            emitter.$off('notification');
         }
     }
 </script>

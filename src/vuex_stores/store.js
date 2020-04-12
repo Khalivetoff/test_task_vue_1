@@ -118,6 +118,7 @@ export const store = new Vuex.Store({
       state.modal_confirm.View = false;
       state.modal_edit.View = false;
       this.commit('setDataLS');
+      emitter.$emit('notification', 'Заметка успешно удалена', 'success');
     },
     //действия после соглашения в модалке подтверждения
     modalAccept(state) {
